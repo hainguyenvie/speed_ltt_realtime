@@ -14,7 +14,7 @@ import time
 
 
 class VADRealtimeTranscriber:
-    def __init__(self, model_dir="zipformer-30m-rnnt-6000h", sample_rate=16000):
+    def __init__(self, model_dir="sherpa-onnx-zipformer-vi-2025-04-20", sample_rate=16000):
         """Initialize transcriber with VAD."""
         self.sample_rate = sample_rate
         self.audio_buffer = []
@@ -30,12 +30,12 @@ class VADRealtimeTranscriber:
         self.chunks_per_second = 10  # 100ms chunks
         self.is_speaking = False
         
-        print("Loading Zipformer model...")
+        print("Loading Sherpa-ONNX Vietnamese model (70k hours training)...")
         
-        encoder = os.path.join(model_dir, "encoder-epoch-20-avg-10.int8.onnx")
-        decoder = os.path.join(model_dir, "decoder-epoch-20-avg-10.int8.onnx")
-        joiner = os.path.join(model_dir, "joiner-epoch-20-avg-10.int8.onnx")
-        tokens = os.path.join(model_dir, "config.json")
+        encoder = os.path.join(model_dir, "encoder-epoch-12-avg-8.onnx")
+        decoder = os.path.join(model_dir, "decoder-epoch-12-avg-8.onnx")
+        joiner = os.path.join(model_dir, "joiner-epoch-12-avg-8.onnx")
+        tokens = os.path.join(model_dir, "tokens.txt")
         
         self.recognizer = sherpa_onnx.OfflineRecognizer.from_transducer(
             encoder=encoder,
@@ -45,7 +45,8 @@ class VADRealtimeTranscriber:
             num_threads=4,
             sample_rate=sample_rate,
             feature_dim=80,
-            decoding_method="greedy_search",
+            decoding_method="modified_beam_search",
+            max_active_paths=4,
         )
         
         print("✅ Model loaded!\n")
